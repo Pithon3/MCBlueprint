@@ -7,9 +7,13 @@ public class Grid {
 	private byte grid[][];
 	Window window;
 	Color colors[] = {new Color(0, 0, 0), new Color(100, 100, 100), new Color(255, 255, 255), new Color(255, 0, 0), new Color(0, 150, 0), new Color(0, 0, 255), new Color(255, 250, 0), new Color(255, 0, 255), new Color(0, 150, 255)};
+	String name;
+	private int count;
 	
-	public Grid(Window win) {
+	public Grid(Window win, String n) {
 		window = win;
+		name = n;
+		count = 0;
 		
 		grid = new byte[500][500];
 		
@@ -20,6 +24,14 @@ public class Grid {
 		}
 	}
 	
+	public Grid(byte[][] g, Window win, String n, int c) {
+		window = win;
+		name = n;
+		count = c;
+		
+		grid = g;
+	}
+
 	public byte[][] getGrid() {
 		return grid;
 	}
@@ -28,7 +40,7 @@ public class Grid {
 		try {
 			if (grid[x][y] == 0) {
 				grid[x][y] = color;
-				window.countUp();
+				count++;
 			} else {
 				grid[x][y] = color;
 			}
@@ -41,19 +53,32 @@ public class Grid {
 		try {
 			if (grid[x][y] > 0) {
 				grid[x][y] = 0;
-				window.countDown();
+				count--;
 			}
 		} catch (Exception e) {
 			
 		}
 	}
 
-	public void setGridTo(byte[][] gridread) {
+	public void setGridTo(byte[][] gridread, String n) {
 		grid = gridread;
+		name = n;
 	}
 
 	public Color getColor(byte color) {
 		return colors[color];
+	}
+
+	public String name() {
+		return name;
+	}
+	
+	public void resetCount() {
+		count = 0;
+	}
+	
+	public int count() {
+		return count;
 	}
 	
 }

@@ -3,6 +3,7 @@ package mcBlueprint;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FileReader {
@@ -19,8 +20,9 @@ public class FileReader {
 		window = win;
 	}
 	
-	public byte[][] readFile(String name) {
-		byte[][] grid = new byte[500][500];
+	public ArrayList<Grid> readFile(String name) {
+		ArrayList<Grid> grid = new ArrayList<Grid>();
+		byte g[][] = new byte[500][500];
 		
 		file = new File(name);
 		try {
@@ -30,6 +32,7 @@ public class FileReader {
 			try {
 				scanner = new Scanner(file);
 			} catch (FileNotFoundException e1) {
+				grid.add(new Grid(g, window, "file", 0));
 				return grid;
 			}
 		}
@@ -40,10 +43,13 @@ public class FileReader {
         }
         scanner.close();
         
-        
+        boolean layernameq = false;  //layername?
+        String layername = "";
         boolean loop = true;
         int place = 0;
         int digit = 2;
+        int layer = 0;
+        int count = 0;
        	while (loop == true) {
         		
        		String s = "";
@@ -51,11 +57,10 @@ public class FileReader {
        			s = string.substring(0, 1);
        		} catch (StringIndexOutOfBoundsException e) {
         		loop = false;
-       		}        		
-        	
+       		}
       		
        		int i = 0;
-       		if (!(s.equals("ä") | s.equals("ë") | s.equals("ï") | s.equals("ö") | s.equals("ü") | s.equals("Ä") | s.equals("Ë") | s.equals("Ï") | s.equals(" "))) {
+       		if (!(s.equals("ä") | s.equals("ë") | s.equals("ï") | s.equals("ö") | s.equals("ü") | s.equals("Ä") | s.equals("Ë") | s.equals("Ï") | s.equals(" ") | s.equals("\"")) & !layernameq) {
        			try {
        				while (!(code[i].equals(s))) {
        					i++;
@@ -67,7 +72,24 @@ public class FileReader {
        			} catch (IndexOutOfBoundsException e) {
        				i = -1;
        			}
-        	} else { 
+        	} else if (s.equals("\"")) {
+        		layernameq = !layernameq;
+        		
+        		if (layernameq) {
+        			layer++;
+        			
+        			if (layer > 1) {
+            			grid.add(new Grid(g, window, layername, count));
+            			count = 0;
+            			layername = "";
+            			g = new byte[500][500];
+            		}
+        		}
+        		
+        	} else if (layernameq) {
+        		layername += s;
+        	}
+        	else {
         		int a, b;
         		
         		a = place / 500;
@@ -80,8 +102,8 @@ public class FileReader {
         			j = 1;
         		}
         		
-        		grid[a][b] = (byte) (j + 1);
-        		window.countUp();
+        		g[a][b] = (byte) (j + 1);
+        		count++;
         		
         		digit = 2;
         		place = 0;
@@ -93,28 +115,35 @@ public class FileReader {
        			loop = false;
        		}
         }
-        
+		grid.add(new Grid(g, window, layername, count));
 		
 		return grid;
 	}
 	
-	public byte writeFile(String name, byte[][] grid) {
-		String s = "";
+	public byte writeFile(String name, ArrayList<Grid> grid) {
+		String s = '"' + grid.get(0).name() + '"';
 		
-		for (int i = 0; i < 500; i++) {
-			for (int j = 0; j < 500; j++) {
-				if (grid[i][j] > 0) {
-					int num = (i * 500) + j;
-					int x, y, z;
+		for (int k = 0; k < grid.size(); k++) {
+			for (int i = 0; i < 500; i++) {
+				for (int j = 0; j < 500; j++) {
+					if (grid.get(k).getGrid()[i][j] > 0) {
+						int num = (i * 500) + j;
+						int x, y, z;
 					
-					x = num / 10000;
-					num %= 10000;
-					y = num / 100;
-					num %= 100;
-					z = num / 1;
+						x = num / 10000;
+						num %= 10000;
+						y = num / 100;
+						num %= 100;
+						z = num / 1;
 					
-					s = s + code[x] + code[y] + code[z] + colorcode[grid[i][j] - 1];
+						s = s + code[x] + code[y] + code[z] + colorcode[grid.get(k).getGrid()[i][j] - 1];
+					}
 				}
+			}
+			try {
+				s = s + '"' + grid.get(k + 1).name() + '"';
+			} catch (IndexOutOfBoundsException e) {
+				
 			}
 		}
 		
